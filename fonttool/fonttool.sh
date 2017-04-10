@@ -5,7 +5,17 @@ if [ $# -ne 1 ]; then
 	exit 1
 fi
 
-newfile=mod_$1
+newfile=mod_`basename $1`
+
+# check whether apple font tool is installed or not
+which -s ftxdumperfuser
+if [ $? -ne 0 ]; then
+	echo "Apple fonttool is not installed"
+	echo ""
+	echo "https://developer.apple.com/textfonts/Fonttools/Index.html"
+
+	exit 1
+fi
 
 # duplicate font
 cp -a $1 $newfile
@@ -25,7 +35,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # apply updated name table
-ftxdumperfuser -t name -d tmp.xml malgun.ttf
+ftxdumperfuser -t name -d tmp.xml $newfile 
 if [ $? -ne 0 ]; then
 	echo "failed to update name table"
 	exit
