@@ -5,6 +5,8 @@
 
 #include "matrix.h"
 
+#define EPS (1e-16)
+
 matrix* matrix_new( int row, int col ){
 	matrix* m;
 	int		i;
@@ -28,7 +30,7 @@ void matrix_free( matrix* m ){
 	int i;
 
 	for( i = 0 ; i < m->row ; i++ ){
-		free(m->var[i]);	
+		free(m->var[i]);
 	}
 	free(m->var);
 	free(m);
@@ -39,22 +41,22 @@ void matrix_init( matrix* m, double* src ){
 
 	int i, j;
 	int width = m->col;
-	
+
 	for( j = 0 ; j < m->row ; j++ )
 		for( i = 0 ; i < width ; i++ )
 			m->var[j][i] = src[j*width+i];
-	
+
 }
 
 void matrix_extract( double* dst, matrix* m ){
 
 	int i, j;
 	int width = m->col;
-	
+
 	for( j = 0 ; j < m->row ; j++ )
 		for( i = 0 ; i < width ; i++ )
 			dst[j*width+i] = m->var[j][i];
-	
+
 }
 
 void matrix_load_identity( matrix* m ){
@@ -106,7 +108,7 @@ matrix* matrix_multiple( matrix* a, matrix* b ){
 	for( j = 0 ; j < row ; j++ ){
 		for( i = 0 ; i < col ; i++ ){
 			for( k = 0 ; k < iter ; k++ ){
-				m->var[j][i] += a->var[j][k]*b->var[k][i];	
+				m->var[j][i] += a->var[j][k]*b->var[k][i];
 			}
 		}
 	}
@@ -135,11 +137,11 @@ matrix* matrix_inv( matrix* m ){
 	for( j = 0 ; j < iter ; j++ )
 		for( i = 0 ; i < iter ; i++ )
 			n->var[j][i] = m->var[j][i];
-	
-	// insert identity matrix 
+
+	// insert identity matrix
 	for( i = 0 ; i < iter ; i++ )
 		n->var[i][i+iter] = 1.0;
-	
+
 	// start gauss elimination
 	for( i = 0 ; i < iter ; i++ ){
 
@@ -148,7 +150,7 @@ matrix* matrix_inv( matrix* m ){
 		for( j = i+1 ; j < iter ; j++ )
 			if( n->var[j][i] > n->var[max_key][i] )
 				max_key = j;
-		
+
 		// swap with current row
 		if( max_key != i ){
 			for( j = 0 ; j < iter*2 ; j++ ){
@@ -161,8 +163,8 @@ matrix* matrix_inv( matrix* m ){
 		// normalize
 		v = n->var[i][i];
 		for( j = i+1 ; j < iter*2 ; j++ )
-			n->var[i][j] /= v;
-		
+			n->var[i][j] /= v + EPS;
+
 		for( j = i+1 ; j < iter ; j++ ){
 			v = n->var[j][i];
 			n->var[j][i] = 0.0;
